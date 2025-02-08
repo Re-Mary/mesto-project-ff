@@ -2,8 +2,6 @@ import "./pages/index.css";
 import { createCard, deleteCard, cardLike } from "./components/card.js";
 import { openModal, closeModal } from "./components/modal";
 
-//спасибо за рекомендации! сейчас времени до сдачи впритык, поэтому реализую необязательные улучшения после жесткого делайна
-
 // @todo: DOM узлы
 const content = document.querySelector('.content');
 const cardList = content.querySelector('.places__list');
@@ -24,52 +22,37 @@ const popupCardTitle = popupImage.querySelector('.popup__caption');
 
 // PROFILE EDIT
 const editPopup = document.querySelector('.popup_type_edit');
-const editProfile = document.querySelector('.profile__edit-button');
-const formModal = document.querySelector('.popup__form');
-const nameInput = formModal.querySelector('.popup__input_type_name');
-const jobInput = formModal.querySelector('.popup__input_type_description');
-const buttonForm = formModal.querySelector('.popup__button');
+const editProfileButton = document.querySelector('.profile__edit-button');
+const editProfileForm = document.forms["edit-profile"];
+const editProfileNameInput = editProfileForm.querySelector('.popup__input_type_name');
+const editProfileJobInput = editProfileForm.querySelector('.popup__input_type_description');
 const profileTitle = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
 
 // FUNCTIONS
 // Form functions
-function openFormEditProfile(name, formEditProfile) {
-    if (!formModal) {
+function openFormEditProfile() {
+    if (!editProfileForm) {
         console.error('Form modal element is null or undefined');
         return;
     }
 
-    nameInput.value = profileTitle.textContent;
-    jobInput.value = profileDescription.textContent;
-
-    if (!nameInput || !jobInput || !buttonForm) {
-        console.error('Form input elements are null or undefined');
-        return;
-    }
-
-    // Form fields handler
-    function handleFieldsEditProfile(evt) {
-        evt.preventDefault();
-        const nameValue = nameInput.value;
-        const jobValue = jobInput.value;
-        formEditProfile({ name: nameValue, job: jobValue });
-        nameInput.value = '';
-        jobInput.value = '';
-    }
-
-    formModal.addEventListener('submit', handleFieldsEditProfile);
+    editProfileNameInput.value = profileTitle.textContent;
+    editProfileJobInput.value = profileDescription.textContent;
 }
 
-// Handle modal form edit profile
-function handleFormEditProfile(formData) {
-    profileTitle.textContent = formData.name;
-    profileDescription.textContent = formData.job;
-    closeModal(editPopup);
+// Handle modal form edit profile (text fields)
+function handleFormEditProfile(evt) {
+    evt.preventDefault(); 
+    const nameValue = editProfileNameInput.value;
+    const jobValue = editProfileJobInput.value;
+    profileTitle.textContent = nameValue;
+    profileDescription.textContent = jobValue;
+    closeModal(editPopup); 
 }
 
 function handleFormAddCard(evt) {
-    evt.preventDefault();
+    evt.preventDefault(); 
     const cardData = {
         name: popupInputCardTitle.value,
         link: popupInputCardLink.value
@@ -77,8 +60,8 @@ function handleFormAddCard(evt) {
 
     const cardElement = createCard(cardData, deleteCard, cardLike, openCardPopup);
     cardList.prepend(cardElement);
-    formNewPlaceAdd.reset();
-    closeModal(popupNewCard);
+    formNewPlaceAdd.reset(); 
+    closeModal(popupNewCard); 
 }
 
 // @todo: Функция открытия модального окна с изображением карточки
@@ -129,9 +112,9 @@ initialCards.forEach(card => {
 
 // EVENT LISTENERS
 // Edit profile
-editProfile.addEventListener('click', () => {
+editProfileButton.addEventListener('click', () => {
     openModal(editPopup);
-    openFormEditProfile('edit-profile', handleFormEditProfile);
+    openFormEditProfile();
 });
 
 // ADD CARD (+) Button
@@ -141,3 +124,6 @@ addCardProfileButton.addEventListener('click', () => {
 
 // Attach form submit handler for adding a new card
 formNewPlaceAdd.addEventListener('submit', handleFormAddCard);
+
+// Attach form submit handler for editing profile
+editProfileForm.addEventListener('submit', handleFormEditProfile);
