@@ -1,6 +1,8 @@
 import "./pages/index.css";
-import { initialCards, createCard, deleteCard, cardLike } from "./components/cards.js";
+import { createCard, deleteCard, cardLike } from "./components/card.js";
 import { openModal, closeModal } from "./components/modal";
+
+//спасибо за рекомендации! сейчас времени до сдачи впритык, поэтому реализую необязательные улучшения после жесткого делайна
 
 // @todo: DOM узлы
 const content = document.querySelector('.content');
@@ -9,6 +11,11 @@ const cardList = content.querySelector('.places__list');
 // ADD Profile (+) button
 const addCardProfileButton = content.querySelector('.profile__add-button');
 const popupNewCard = document.querySelector('.popup_type_new-card');
+
+// ADD CARD (+) Button
+const formNewPlaceAdd = document.forms["new-place"];
+const popupInputCardTitle = formNewPlaceAdd.querySelector('.popup__input_type_card-name');
+const popupInputCardLink = formNewPlaceAdd.querySelector('.popup__input_type_url');
 
 // Card Images
 const popupImage = document.querySelector('.popup_type_image');
@@ -19,27 +26,15 @@ const popupCardTitle = popupImage.querySelector('.popup__caption');
 const editPopup = document.querySelector('.popup_type_edit');
 const editProfile = document.querySelector('.profile__edit-button');
 const formModal = document.querySelector('.popup__form');
-const formEditProfile = document.forms['edit-profile'];
 const nameInput = formModal.querySelector('.popup__input_type_name');
 const jobInput = formModal.querySelector('.popup__input_type_description');
 const buttonForm = formModal.querySelector('.popup__button');
 const profileTitle = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
 
-// Edit profile
-editProfile.addEventListener('click', () => {
-    openModal(editPopup);
-    openForm('edit-profile', handleFormEditProfile);
-});
-
-// CLOSE button
-const closeButton = editPopup.querySelector('.popup__close');
-closeButton.addEventListener('click', () => {
-    closeModal(editPopup);
-});
-
+// FUNCTIONS
 // Form functions
-function openForm(name, formEditProfile) {
+function openFormEditProfile(name, formEditProfile) {
     if (!formModal) {
         console.error('Form modal element is null or undefined');
         return;
@@ -53,8 +48,8 @@ function openForm(name, formEditProfile) {
         return;
     }
 
-    // Form submit handler
-    function handleFormSubmit(evt) {
+    // Form fields handler
+    function handleFieldsEditProfile(evt) {
         evt.preventDefault();
         const nameValue = nameInput.value;
         const jobValue = jobInput.value;
@@ -63,28 +58,15 @@ function openForm(name, formEditProfile) {
         jobInput.value = '';
     }
 
-    formModal.addEventListener('submit', handleFormSubmit);
-    buttonForm.addEventListener('click', (evt) => {
-        evt.preventDefault();
-        handleFormSubmit(evt);
-    });
+    formModal.addEventListener('submit', handleFieldsEditProfile);
 }
 
-// Handle form edit profile
+// Handle modal form edit profile
 function handleFormEditProfile(formData) {
     profileTitle.textContent = formData.name;
     profileDescription.textContent = formData.job;
     closeModal(editPopup);
 }
-
-// ADD CARD (+) Button
-const formNewPlaceAdd = document.forms["new-place"];
-const popupInputCardTitle = formNewPlaceAdd.querySelector('.popup__input_type_card-name');
-const popupInputCardLink = formNewPlaceAdd.querySelector('.popup__input_type_url');
-
-addCardProfileButton.addEventListener('click', () => {
-    openModal(popupNewCard);
-});
 
 function handleFormAddCard(evt) {
     evt.preventDefault();
@@ -99,12 +81,41 @@ function handleFormAddCard(evt) {
     closeModal(popupNewCard);
 }
 
-function openCardPopup(cardImage) {
-    popupCardTitle.textContent = cardImage.name;
-    popupCardImage.src = cardImage.link;
-    popupCardImage.alt = cardImage.name;
+// @todo: Функция открытия модального окна с изображением карточки
+function openCardPopup(card) {
+    popupCardTitle.textContent = card.name;
+    popupCardImage.src = card.link;
+    popupCardImage.alt = card.name;
     openModal(popupImage);
 }
+
+// Initial Cards
+const initialCards = [
+    {
+        name: "Архыз",
+        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/arkhyz.jpg",
+    },
+    {
+        name: "Челябинская область",
+        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/chelyabinsk-oblast.jpg",
+    },
+    {
+        name: "Иваново",
+        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/ivanovo.jpg",
+    },
+    {
+        name: "Камчатка",
+        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/kamchatka.jpg",
+    },
+    {
+        name: "Холмогорский район",
+        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/kholmogorsky-rayon.jpg",
+    },
+    {
+        name: "Байкал",
+        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/baikal.jpg",
+    }
+];
 
 // Render initial cards
 const renderCard = (card) => {
@@ -114,6 +125,18 @@ const renderCard = (card) => {
 
 initialCards.forEach(card => {
     renderCard(card);
+});
+
+// EVENT LISTENERS
+// Edit profile
+editProfile.addEventListener('click', () => {
+    openModal(editPopup);
+    openFormEditProfile('edit-profile', handleFormEditProfile);
+});
+
+// ADD CARD (+) Button
+addCardProfileButton.addEventListener('click', () => {
+    openModal(popupNewCard);
 });
 
 // Attach form submit handler for adding a new card

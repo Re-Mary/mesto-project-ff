@@ -34,13 +34,13 @@ export function openModal(popup) {
 
     // Add event listeners
     closeModalButton.addEventListener('click', handleCloseButton);
-    popup.addEventListener('click', handleOverlayClick);
+    popup.addEventListener('mousedown', handleOverlayClick); // Corrected typo here
     document.addEventListener('keydown', handleEscape);
 
     // Store the remove event listeners function
     popup._removeHandlers = () => {
         closeModalButton.removeEventListener('click', handleCloseButton);
-        popup.removeEventListener('click', handleOverlayClick);
+        popup.removeEventListener('mousedown', handleOverlayClick); // Corrected typo here
         document.removeEventListener('keydown', handleEscape);
     };
 }
