@@ -7,3 +7,18 @@
 .card__image:hover {
   cursor: pointer;
 }
+
+.card__like {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.card__like-counter {
+  position: relative;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 16px;
+  color: #000;
+  margin: 0;
+}

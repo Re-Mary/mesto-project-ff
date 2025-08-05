@@ -1,6 +1,9 @@
 import "./pages/index.css";
 import { createCard, deleteCard, cardLike } from "./components/card.js";
 import { openModal, closeModal } from "./components/modal";
+import { enableValidation} from "./components/validation.js";
+import { getUserInfo, getCards, changeUserInfo, changeAvatar } from "./components/api.js";
+
 
 // @todo: DOM узлы
 const content = document.querySelector('.content');
@@ -29,29 +32,100 @@ const editProfileJobInput = editProfileForm.querySelector('.popup__input_type_de
 const profileTitle = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
 
+
+
+//Validation configuration
+/*
+const validationConfig= {
+    formSelector: '.popup__form',
+    inputSelector: '.popup__input',
+    submitButtonSelector: '.popup__button',
+    inactiveButtonClass: 'popup__button_disabled',
+    inputErrorClass: 'popup__input_type_error',
+    errorClass: 'popup__error_visible'
+};
+*/
+
+
+// Load data from server (user and cards)
+Promise.all([getUserInfo(), getCards()])
+    .then(([user, cards]) => {
+        updatedUser(user);
+        const userId = user._id;
+        cards.forEach((card) => {
+            const cardElement = createCard(
+                card, 
+                userId, 
+                deleteCard, 
+                cardLike,
+                openCardPopup);
+            cardList.append(cardElement);
+        });
+    })
+    .catch((err) => {
+        console.error(err);
+    }); 
+
+// Update info on the page
+const updatedUser = (user) => {
+    profileTitle.textContent = user.name;
+    profileDescription.textContent = user.about;
+    popupCardImage.src = user.avatar;
+    popupCardImage.alt = `На изображении ${user.name}`; 
+}
+
+// Load and render cards from server
+getCards()
+    .then((cards) => {
+        cards.forEach((card) => {
+            const cardElement = createCard(card, userId, deleteCard, cardLike, openCardPopup);
+            const likeCounter = cardElement.querySelector('.card__like-counter');
+            likeCounter.textContent = card.likes.length;
+            cardList.append(cardElement);
+        });
+    })
+    .catch((err) => {
+        console.error(err);
+    });
+
+
 // FUNCTIONS
 // Form functions
-function openFormEditProfile() {
+const openFormEditProfile = () => {
     if (!editProfileForm) {
         console.error('Form modal element is null or undefined');
         return;
     }
 
+    enableValidation(editProfileForm);
+
     editProfileNameInput.value = profileTitle.textContent;
     editProfileJobInput.value = profileDescription.textContent;
 }
 
+const openFormAddCard = () => {
+    if (!formNewPlaceAdd) {
+        console.error('Form modal element is null or undefined');
+        return;
+    }
+
+    enableValidation(formNewPlaceAdd);
+
+    formNewPlaceAdd.reset();
+}
+
 // Handle modal form edit profile (text fields)
-function handleFormEditProfile(evt) {
+const handleFormEditProfile = (evt) => {
     evt.preventDefault(); 
     const nameValue = editProfileNameInput.value;
     const jobValue = editProfileJobInput.value;
+
     profileTitle.textContent = nameValue;
     profileDescription.textContent = jobValue;
     closeModal(editPopup); 
 }
 
-function handleFormAddCard(evt) {
+const handleFormAddCard = (evt) => {
     evt.preventDefault(); 
     const cardData = {
         name: popupInputCardTitle.value,
@@ -65,65 +139,72 @@ function handleFormAddCard(evt) {
 }
 
 // @todo: Функция открытия модального окна с изображением карточки
-function openCardPopup(card) {
+const openCardPopup = (card) => {
     popupCardTitle.textContent = card.name;
     popupCardImage.src = card.link;
     popupCardImage.alt = card.name;
     openModal(popupImage);
 }
 
-// Initial Cards
-const initialCards = [
-    {
-        name: "Архыз",
-        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/arkhyz.jpg",
-    },
-    {
-        name: "Челябинская область",
-        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/chelyabinsk-oblast.jpg",
-    },
-    {
-        name: "Иваново",
-        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/ivanovo.jpg",
-    },
-    {
-        name: "Камчатка",
-        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/kamchatka.jpg",
-    },
-    {
-        name: "Холмогорский район",
-        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/kholmogorsky-rayon.jpg",
-    },
-    {
-        name: "Байкал",
-        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/baikal.jpg",
-    }
-];
-
-// Render initial cards
-const renderCard = (card) => {
-    const cardElement = createCard(card, deleteCard, cardLike, openCardPopup);
-    cardList.append(cardElement);
-};
-
-initialCards.forEach(card => {
-    renderCard(card);
-});
-
 // EVENT LISTENERS
 // Edit profile
 editProfileButton.addEventListener('click', () => {
     openModal(editPopup);
-    openFormEditProfile();
+    openFormEditProfile(); 
 });
 
 // ADD CARD (+) Button
 addCardProfileButton.addEventListener('click', () => {
     openModal(popupNewCard);
+    openFormAddCard();
 });
+
 
 // Attach form submit handler for adding a new card
 formNewPlaceAdd.addEventListener('submit', handleFormAddCard);
 
 // Attach form submit handler for editing profile
 editProfileForm.addEventListener('submit', handleFormEditProfile);
+
+
+
+
+
+// // AVATAR EDIT
+// const popupAvatar = document.querySelector('.profile__image');
+// const popupAvatarForm = document.forms["popup_type_image"];
+// const editAvatarButton = document.querySelector('.profile__edit-avatar-button');
+// const popupInputAvatarLink = popupAvatarForm.querySelector('.popup__input_type_avatar-link');
+// const saveAvatarButton = popupAvatarForm.querySelector('.popup__button');
+
+// // Функция открытия модального окна редактирования аватара
+// const openAvatarPopup = () => {
+//     if (!popupAvatarForm) {
+//         console.error('Form modal element is null or undefined');
+//         return;
+//     }
+//     enableValidation(popupAvatarForm);
+
+// }
+
+// // Edit avatar
+// editAvatarButton.addEventListener('click', () => {
+//     openModal(openAvatarPopup);
+// });
+
+// saveAvatarButton.addEventListener('click', () => {
+//     popupInputAvatarLink.value = popupAvatarForm.querySelector('.popup__input_type_avatar-link').value;
+//     changeAvatar(); 
+//     closeModal(popupAvatarForm);
+// });
+
+
+// // ToDo счетчик лайков
+// const likeCounter = document.querySelectorAll('.card__like-counter');
+// // все лайки лежат в одном массиве likes. При нажатии на лайк, 
+// // в массиве изменяется количество лайков, при нажатии на дизлайк, 
+// // в массиве уменьшается количество лайков. Длина массива - количество лайков.
+// const likes = document.querySelectorAll('.card__like-button');
+// likes.forEach((like, index) => {
+//     likeCounter[index].textContent = likes.length;
+// });

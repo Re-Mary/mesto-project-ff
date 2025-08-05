@@ -1,11 +1,21 @@
+import { addLike, deleteLike } from "./api";
+
 // @todo: Темплейт карточки
 const cardTemplate = document.querySelector('#card-template').content;
+
+//Поиск шаблона карточки
+const getTemplate = () => {
+  return document
+    .querySelector("#card-template")
+    .content.querySelector(".card")
+    .cloneNode(true);
+};
 
 // @todo: Функция создания карточки
 // as argument should be card data and callback function for delete the card
 export function createCard(card, deleteCard, cardLike, openCardPopup) {
   // clone content of the card
-  const cardElement = cardTemplate.querySelector('.card').cloneNode(true);
+  const cardElement = getTemplate();
   if (!cardElement) {
     console.error('Card element is null or undefined');
     return;
@@ -15,6 +25,9 @@ export function createCard(card, deleteCard, cardLike, openCardPopup) {
   const deleteButton = cardElement.querySelector('.card__delete-button');
   const likeButton = cardElement.querySelector('.card__like-button');
   const cardImage = cardElement.querySelector('.card__image');
+  const userId = card.owner._id;
+  const isLiked = card.likes.some((like) => like._id === userId);
+  const likeCounter = cardElement.querySelector('.card__like-counter');
 
   if (!deleteButton || !likeButton || !cardImage) {
     console.error('Card buttons or image elements are null or undefined');
@@ -26,14 +39,20 @@ export function createCard(card, deleteCard, cardLike, openCardPopup) {
   cardImage.src = card.link;
   cardImage.alt = `На изображении ${card.name}`;
 
-  // add eventListener for delete-icon with a callback as an argument
+  // set the value for like counter
+  likeCounter.textContent = card.likes.length;
+  if (isLiked) {
+    likeButton.classList.add('card__like-button_is-active');
+  }
+
+  // add eventListener for trash-bin_icon(delete card) with a callback as an argument
   deleteButton.addEventListener('click', () => {
     deleteCard(cardElement); // call back with an argument
   });
 
   // add eventListener for like-button with a callback as an argument
   likeButton.addEventListener('click', () => {
-    cardLike(likeButton);
+    cardLike(likeButton, card._id);
   });
 
   // add eventListener for card image click to open the image modal window
@@ -46,11 +65,35 @@ export function createCard(card, deleteCard, cardLike, openCardPopup) {
 }
 
 // @todo: Функция удаления карточки
-export function deleteCard(cardElement) {
+export const deleteCard = (cardElement) => {
   cardElement.remove();
 }
 
 // @todo: Функция лайка карточки
-export function cardLike(likeButton) {
-  likeButton.classList.toggle('card__like-button_is-active');
+//Добавление лайка
+export const cardLike = (likeButton, cardId) => {
+  const isLiked = likeButton.classList.contains('card__like-button_is-active');
+  // function to delete like
+  if (isLiked) {
+    deleteLike(cardId)
+      .then((data) => {
+        likeButton.classList.remove('card__like-button_is-active');
+        likeCounter.textContent = data.likes.length;
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  } else {
+    //function to add like
+    addLike(cardId)
+      .then((data) => {
+        likeButton.classList.add('card__like-button_is-active');
+        const likeCounter = likeButton.nextElementSibling;
+        likeCounter.textContent = data.likes.length;
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+
 }
