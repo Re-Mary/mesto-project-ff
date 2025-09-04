@@ -34,6 +34,7 @@
   color: #FF0000;
 }
 
+/*
 .profile__image:hover {
   cursor: url('../../../images/edit-icon.svg'), default;
   opacity: 0.5;
@@ -42,8 +43,9 @@
   -moz-transition: 0.3s;
   -ms-transition: 0.3s;
   -o-transition: 0.3s;
-  transition: 0.3s; */
+  transition: 0.3s; */ /*
 }
+*/
 
 @media screen and (max-width: 568px) {
   .popup__button {

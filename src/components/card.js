@@ -13,7 +13,7 @@ const getTemplate = () => {
 
 // @todo: Функция создания карточки
 // as argument should be card data and callback function for delete the card
-export function createCard(card, deleteCard, cardLike, openCardPopup) {
+export function createCard(card, deleteCard, cardLike, openCardPopup, userId) {
   // clone content of the card
   const cardElement = getTemplate();
   if (!cardElement) {
@@ -25,14 +25,14 @@ export function createCard(card, deleteCard, cardLike, openCardPopup) {
   const deleteButton = cardElement.querySelector('.card__delete-button');
   const likeButton = cardElement.querySelector('.card__like-button');
   const cardImage = cardElement.querySelector('.card__image');
-  const userId = card.owner._id;
+//  const userId = card.owner._id;
   const isLiked = card.likes.some((like) => like._id === userId);
   const likeCounter = cardElement.querySelector('.card__like-counter');
 
-  if (!deleteButton || !likeButton || !cardImage) {
-    console.error('Card buttons or image elements are null or undefined');
-    return;
-  }
+ if (!cardElement || !deleteButton || !likeButton || !cardImage) {
+  console.error('Ошибка: не найдены элементы карточки');
+  return;
+}
 
   // set the value for nested elements
   cardElement.querySelector('.card__title').textContent = card.name;
@@ -47,7 +47,7 @@ export function createCard(card, deleteCard, cardLike, openCardPopup) {
 
   // add eventListener for trash-bin_icon(delete card) with a callback as an argument
   deleteButton.addEventListener('click', () => {
-    deleteCard(cardElement); // call back with an argument
+    deleteCard(cardElement); // callback with an argument
   });
 
   // add eventListener for like-button with a callback as an argument
@@ -73,27 +73,40 @@ export const deleteCard = (cardElement) => {
 //Добавление лайка
 export const cardLike = (likeButton, cardId) => {
   const isLiked = likeButton.classList.contains('card__like-button_is-active');
-  // function to delete like
-  if (isLiked) {
-    deleteLike(cardId)
-      .then((data) => {
-        likeButton.classList.remove('card__like-button_is-active');
-        likeCounter.textContent = data.likes.length;
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  } else {
-    //function to add like
-    addLike(cardId)
-      .then((data) => {
-        likeButton.classList.add('card__like-button_is-active');
-        const likeCounter = likeButton.nextElementSibling;
-        likeCounter.textContent = data.likes.length;
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  }
+  const likeCounter = likeButton.nextElementSibling;
+  const likePromise = isLiked ? deleteLike(cardId) : addLike(cardId);
+
+  likePromise
+    .then((data) => {
+      likeButton.classList.toggle('card__like-button_is-active');
+      likeCounter.textContent = data.likes.length;
+    })
+    .catch((err) => {
+      console.error('Ошибка при добавлении/удалении лайка', err);
+    });
+
+
+  // // function to delete like
+  // if (isLiked) {
+  //   deleteLike(cardId)
+  //     .then((data) => {
+  //       likeButton.classList.remove('card__like-button_is-active');
+  //       likeCounter.textContent = data.likes.length;
+  //     })
+  //     .catch((err) => {
+  //       console.error(err);
+  //     });
+  // } else {
+  //   //function to add like
+  //   addLike(cardId)
+  //     .then((data) => {
+  //       likeButton.classList.add('card__like-button_is-active');
+  //       const likeCounter = likeButton.nextElementSibling;
+  //       likeCounter.textContent = data.likes.length;
+  //     })
+  //     .catch((err) => {
+  //       console.error(err);
+  //     });
+  // }
 
 }

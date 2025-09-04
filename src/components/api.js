@@ -1,4 +1,3 @@
-import { data } from "autoprefixer";
 
 const BASE_URL = 'https://nomoreparties.co/v1/wff-cohort-31';
 const TOKEN = '12e41adc-4b52-40c9-925a-307db9623fc0';
@@ -48,8 +47,8 @@ export const changeUserInfo = (user) =>
 
 // Изменение карточки
 export const changeCards = (card) => {
-    request('/cards', {
-        method: 'PATCH',
+    return request('/cards', {
+        method: 'POST',
         ...HEADERS,
         body: JSON.stringify({
             name: card.name,
@@ -60,7 +59,7 @@ export const changeCards = (card) => {
 
 // Добавление карточки на сервер
 export const addCards = (card) => {
-    request('/cards', {
+    return request('/cards', {
         method: 'POST',
         ...HEADERS,
         body: JSON.stringify({
@@ -71,43 +70,45 @@ export const addCards = (card) => {
 }
 
 // Удаление карточки с сервера
-export const deleteCards = () => {
-    request(`/cards/${cardId}`, {
+export const deleteCards = (cardId) => {
+    return request(`/cards/${cardId}`, {
         method: 'DELETE',
         ...HEADERS,
     });
 }
 
 // Добавление лайка
-export const addLike = (cardId) => {
-    request(`/cards/likes/${cardId}`, {
-        method: 'PUT',
-        ...HEADERS,
-    })
-    .then(checkResponse)
-    .catch(err => {
+export const addLike = async (cardId) => {
+    try {
+        const response = await request(`/cards/${cardId}/likes`, {
+            method: 'PUT',
+            ...HEADERS,
+        });
+        return checkResponse(response);
+    } catch (err) {
         console.error('Возникла проблема с добавлением лайка', err);
         throw err;
-    });
+    }
 }
 
 // Удаление лайка
-export const deleteLike = (cardId) => {
-    request(`/cards/likes/${cardId}`, {
-        method: 'DELETE',
-        ...HEADERS,
-    })
-    .then(checkResponse)
-    .catch(err => {
+export const deleteLike = async (cardId) => {
+    try {
+        const response = await request(`/cards/${cardId}/likes`, {
+            method: 'DELETE',
+            ...HEADERS,
+        });
+        return checkResponse(response);
+    } catch (err) {
         console.error('Возникла проблема с удалением лайка', err);
         throw err;
-    });
+    }
 }
 
 
 // Изменение фото профиля
 export const changeAvatar = (user) => {
-    request('/user/me/avatar', {
+    return request('/user/me/avatar', {
         method: 'PATCH',
         ...HEADERS,
         body: JSON.stringify({

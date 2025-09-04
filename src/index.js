@@ -75,18 +75,18 @@ const updatedUser = (user) => {
 }
 
 // Load and render cards from server
-getCards()
-    .then((cards) => {
-        cards.forEach((card) => {
-            const cardElement = createCard(card, userId, deleteCard, cardLike, openCardPopup);
-            const likeCounter = cardElement.querySelector('.card__like-counter');
-            likeCounter.textContent = card.likes.length;
-            cardList.append(cardElement);
-        });
-    })
-    .catch((err) => {
-        console.error(err);
-    });
+// getCards()
+//     .then((cards) => {
+//         cards.forEach((card) => {
+//             const cardElement = createCard(card, userId, deleteCard, cardLike, openCardPopup);
+//             const likeCounter = cardElement.querySelector('.card__like-counter');
+//             likeCounter.textContent = card.likes.length;
+//             cardList.append(cardElement);
+//         });
+//     })
+//     .catch((err) => {
+//         console.error(err);
+//     });
 
 
 // FUNCTIONS
@@ -170,33 +170,49 @@ editProfileForm.addEventListener('submit', handleFormEditProfile);
 
 
 
-// // AVATAR EDIT
-// const popupAvatar = document.querySelector('.profile__image');
-// const popupAvatarForm = document.forms["popup_type_image"];
-// const editAvatarButton = document.querySelector('.profile__edit-avatar-button');
-// const popupInputAvatarLink = popupAvatarForm.querySelector('.popup__input_type_avatar-link');
-// const saveAvatarButton = popupAvatarForm.querySelector('.popup__button');
+// AVATAR EDIT
+const popupAvatar = document.querySelector('.profile__image');
+const popupAvatarForm = document.forms["popup_type_image"];
+const editAvatarButton = document.querySelector('.profile__edit-avatar-button');
+const popupInputAvatarLink = popupAvatarForm.querySelector('.popup__input_type_avatar-link');
+const saveAvatarButton = popupAvatarForm.querySelector('.popup__button');
 
-// // Функция открытия модального окна редактирования аватара
-// const openAvatarPopup = () => {
-//     if (!popupAvatarForm) {
-//         console.error('Form modal element is null or undefined');
-//         return;
-//     }
-//     enableValidation(popupAvatarForm);
+// Функция открытия модального окна редактирования аватара
+const openAvatarPopup = () => {
+    openModal(popupAvatarForm);
+    enableValidation(popupAvatarForm);
+    popupAvatarForm.reset();
 
-// }
+    if (!popupAvatarForm) {
+        console.error('Form modal element is null or undefined');
+        return;
+    }
+}
 
-// // Edit avatar
-// editAvatarButton.addEventListener('click', () => {
-//     openModal(openAvatarPopup);
-// });
+// Edit avatar
+editAvatarButton.addEventListener('click', openAvatarPopup);
 
-// saveAvatarButton.addEventListener('click', () => {
-//     popupInputAvatarLink.value = popupAvatarForm.querySelector('.popup__input_type_avatar-link').value;
-//     changeAvatar(); 
-//     closeModal(popupAvatarForm);
-// });
+popupAvatarForm.addEventListener('submit', (evt) => {
+    evt.preventDefault(); 
+    const avatarLink = popupAvatarForm.querySelector('.popup__input_type_avatar-link').value;
+    changeAvatar({avatar: avatarLink})
+        .then(() => {
+            // Обновите аватар на странице, если нужно
+            popupAvatar.src = avatarLink;
+            popupAvatar.alt = `На изображении ${profileTitle.textContent}`;
+            closeModal(popupAvatarForm);
+        })
+        .catch((err) => {
+            console.error('Ошибка при изменении аватара:',err);
+        });
+
+});
+
+saveAvatarButton.addEventListener('click', () => {
+    popupInputAvatarLink.value = popupAvatarForm.querySelector('.popup__input_type_avatar-link').value;
+    changeAvatar(); 
+    closeModal(popupAvatarForm);
+});
 
 
 // // ToDo счетчик лайков
