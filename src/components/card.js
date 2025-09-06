@@ -1,9 +1,10 @@
-import { addLike, deleteLike } from "./api";
+import { addLike, deleteLike, deleteCards } from "./api";
+
+
 
 // @todo: Темплейт карточки
 const cardTemplate = document.querySelector('#card-template').content;
 
-//Поиск шаблона карточки
 const getTemplate = () => {
   return document
     .querySelector("#card-template")
@@ -11,69 +12,67 @@ const getTemplate = () => {
     .cloneNode(true);
 };
 
-// @todo: Функция создания карточки
-// as argument should be card data and callback function for delete the card
+// @todo: Create function to create card
 export function createCard(card, deleteCard, cardLike, openCardPopup, userId) {
-  // clone content of the card
   const cardElement = getTemplate();
   if (!cardElement) {
     console.error('Card element is null or undefined');
     return;
   }
 
-  // create variable for delete button
   const deleteButton = cardElement.querySelector('.card__delete-button');
   const likeButton = cardElement.querySelector('.card__like-button');
   const cardImage = cardElement.querySelector('.card__image');
-//  const userId = card.owner._id;
   const isLiked = card.likes.some((like) => like._id === userId);
   const likeCounter = cardElement.querySelector('.card__like-counter');
 
- if (!cardElement || !deleteButton || !likeButton || !cardImage) {
-  console.error('Ошибка: не найдены элементы карточки');
-  return;
-}
+  const isOwner = card.owner._id === userId;
+  if (!isOwner) {
+    deleteButton.style.display = 'none';
+  }
 
-  // set the value for nested elements
+ 
   cardElement.querySelector('.card__title').textContent = card.name;
   cardImage.src = card.link;
   cardImage.alt = `На изображении ${card.name}`;
-
-  // set the value for like counter
   likeCounter.textContent = card.likes.length;
+
   if (isLiked) {
     likeButton.classList.add('card__like-button_is-active');
   }
 
-  // add eventListener for trash-bin_icon(delete card) with a callback as an argument
+  // EVENTLISTNERS
+  //Delete card event listener
   deleteButton.addEventListener('click', () => {
-    deleteCard(cardElement); // callback with an argument
+    deleteCard(cardElement, card._id); 
   });
 
-  // add eventListener for like-button with a callback as an argument
+  // Like card event listener
   likeButton.addEventListener('click', () => {
-    cardLike(likeButton, card._id);
+    cardLike(likeButton, card._id, likeCounter);
   });
 
-  // add eventListener for card image click to open the image modal window
   cardImage.addEventListener('click', () => {
     openCardPopup(card);
   });
 
-  // not forget to return
   return cardElement;
 }
 
-// @todo: Функция удаления карточки
-export const deleteCard = (cardElement) => {
-  cardElement.remove();
-}
+// @todo: Create function to delete card
+export const deleteCard = (cardElement, cardId) => {
+    deleteCards(cardId)
+      .then(() => {
+        cardElement.remove();
+      })
+      .catch((err) => {
+        console.error('Ошибка при удалении карточки:', err);
+      });
+  }
 
-// @todo: Функция лайка карточки
-//Добавление лайка
-export const cardLike = (likeButton, cardId) => {
+// @todo: Create function to like card
+export const cardLike = (likeButton, cardId, likeCounter) => {
   const isLiked = likeButton.classList.contains('card__like-button_is-active');
-  const likeCounter = likeButton.nextElementSibling;
   const likePromise = isLiked ? deleteLike(cardId) : addLike(cardId);
 
   likePromise
@@ -84,29 +83,5 @@ export const cardLike = (likeButton, cardId) => {
     .catch((err) => {
       console.error('Ошибка при добавлении/удалении лайка', err);
     });
-
-
-  // // function to delete like
-  // if (isLiked) {
-  //   deleteLike(cardId)
-  //     .then((data) => {
-  //       likeButton.classList.remove('card__like-button_is-active');
-  //       likeCounter.textContent = data.likes.length;
-  //     })
-  //     .catch((err) => {
-  //       console.error(err);
-  //     });
-  // } else {
-  //   //function to add like
-  //   addLike(cardId)
-  //     .then((data) => {
-  //       likeButton.classList.add('card__like-button_is-active');
-  //       const likeCounter = likeButton.nextElementSibling;
-  //       likeCounter.textContent = data.likes.length;
-  //     })
-  //     .catch((err) => {
-  //       console.error(err);
-  //     });
-  // }
-
 }
+    

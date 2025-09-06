@@ -9,7 +9,6 @@ const HEADERS = {
     },
 };
 
-// Функция проверки ответа
 const checkResponse = (response) => {
     if (response.ok) {
         return response.json();
@@ -17,38 +16,40 @@ const checkResponse = (response) => {
     return Promise.reject(`Ошибка ${response.status}`);
 }
 
-// Функция запроса
 const request = (endpoint, options) =>
     fetch(`${BASE_URL}${endpoint}`, options)
         .then(checkResponse);
 
-// Запрос на сервер информации о пользователе
+// Ask to server for user info
 export const getUserInfo = () =>
     request('/users/me', {
         ...HEADERS,
     });
 
-// Запрос на сервер информации о карточках
+// Ask to server for cards info
 export const getCards = () =>
     request('/cards', {
         ...HEADERS,
     });
 
-// Изменение информации о пользователе
+// Function to change user info
 export const changeUserInfo = (user) =>
-    request('/user/me', {
+    request('/users/me', {
         method: 'PATCH',
-        ...HEADERS,
+        headers: {
+            'authorization': TOKEN,
+            'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
             name: user.name,
             about: user.about,
         }),
     });
 
-// Изменение карточки
+// Function to change card
 export const changeCards = (card) => {
     return request('/cards', {
-        method: 'POST',
+        method: 'PATCH',
         ...HEADERS,
         body: JSON.stringify({
             name: card.name,
@@ -57,19 +58,19 @@ export const changeCards = (card) => {
     });
 }
 
-// Добавление карточки на сервер
-export const addCards = (card) => {
+// Function to add card to server
+export const addCard = (card) => {
     return request('/cards', {
         method: 'POST',
         ...HEADERS,
         body: JSON.stringify({
             name: card.name,
-            link: card.link,
+            link: card.link
         }),
     });
 }
 
-// Удаление карточки с сервера
+// Function to delete card from server
 export const deleteCards = (cardId) => {
     return request(`/cards/${cardId}`, {
         method: 'DELETE',
@@ -77,42 +78,36 @@ export const deleteCards = (cardId) => {
     });
 }
 
-// Добавление лайка
-export const addLike = async (cardId) => {
-    try {
-        const response = await request(`/cards/${cardId}/likes`, {
-            method: 'PUT',
-            ...HEADERS,
-        });
-        return checkResponse(response);
-    } catch (err) {
-        console.error('Возникла проблема с добавлением лайка', err);
-        throw err;
-    }
+// Function to add like
+export const addLike = (cardId) => {
+    return request(`/cards/${cardId}/likes`, {
+        method: 'PUT',
+        ...HEADERS,
+    });
 }
 
-// Удаление лайка
-export const deleteLike = async (cardId) => {
-    try {
-        const response = await request(`/cards/${cardId}/likes`, {
+
+// Function to delete like
+export const deleteLike = (cardId) => {
+        return request(`/cards/${cardId}/likes`, {
             method: 'DELETE',
             ...HEADERS,
         });
-        return checkResponse(response);
-    } catch (err) {
-        console.error('Возникла проблема с удалением лайка', err);
-        throw err;
-    }
 }
 
 
-// Изменение фото профиля
-export const changeAvatar = (user) => {
-    return request('/user/me/avatar', {
+
+// Function to change profile image
+export const changeAvatar = (avatarData) => {
+    return request('/users/me/avatar', {
         method: 'PATCH',
-        ...HEADERS,
+        headers: {
+            'authorization': TOKEN,
+            'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
-            avatar: user.avatar,
+            avatar: avatarData.avatar
         }),
     });
 }
+

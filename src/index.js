@@ -1,8 +1,8 @@
 import "./pages/index.css";
 import { createCard, deleteCard, cardLike } from "./components/card.js";
-import { openModal, closeModal } from "./components/modal";
-import { enableValidation} from "./components/validation.js";
-import { getUserInfo, getCards, changeUserInfo, changeAvatar } from "./components/api.js";
+import { openModal, closeModal } from "./components/modal.js";
+import { enableValidation, clearValidation } from "./components/validation.js";
+import { getUserInfo, getCards, changeUserInfo, changeAvatar, addCard } from "./components/api.js";
 
 
 // @todo: DOM узлы
@@ -31,11 +31,15 @@ const editProfileNameInput = editProfileForm.querySelector('.popup__input_type_n
 const editProfileJobInput = editProfileForm.querySelector('.popup__input_type_description');
 const profileTitle = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
+const profileImage = document.querySelector('.profile__image');
 
+// AVATAR EDIT
+const popupAvatar = document.querySelector('.popup_type_avatar');
+const popupAvatarForm = document.forms['new-avatar'];
+const popupInputAvatarLink = popupAvatarForm.querySelector('.popup__input_type_url');
+const saveAvatarButton = popupAvatarForm.querySelector('.popup__button');
 
-
-//Validation configuration
-/*
+// CONFIG
 const validationConfig= {
     formSelector: '.popup__form',
     inputSelector: '.popup__input',
@@ -44,10 +48,9 @@ const validationConfig= {
     inputErrorClass: 'popup__input_type_error',
     errorClass: 'popup__error_visible'
 };
-*/
 
 
-// Load data from server (user and cards)
+// Load data from server
 Promise.all([getUserInfo(), getCards()])
     .then(([user, cards]) => {
         updatedUser(user);
@@ -55,10 +58,11 @@ Promise.all([getUserInfo(), getCards()])
         cards.forEach((card) => {
             const cardElement = createCard(
                 card, 
-                userId, 
                 deleteCard, 
                 cardLike,
-                openCardPopup);
+                openCardPopup,
+                userId,
+            );
             cardList.append(cardElement);
         });
     })
@@ -70,75 +74,70 @@ Promise.all([getUserInfo(), getCards()])
 const updatedUser = (user) => {
     profileTitle.textContent = user.name;
     profileDescription.textContent = user.about;
-    popupCardImage.src = user.avatar;
-    popupCardImage.alt = `На изображении ${user.name}`; 
+    profileImage.style.backgroundImage = `url(${user.avatar})`;
 }
-
-// Load and render cards from server
-// getCards()
-//     .then((cards) => {
-//         cards.forEach((card) => {
-//             const cardElement = createCard(card, userId, deleteCard, cardLike, openCardPopup);
-//             const likeCounter = cardElement.querySelector('.card__like-counter');
-//             likeCounter.textContent = card.likes.length;
-//             cardList.append(cardElement);
-//         });
-//     })
-//     .catch((err) => {
-//         console.error(err);
-//     });
-
 
 // FUNCTIONS
 // Form functions
 const openFormEditProfile = () => {
-    if (!editProfileForm) {
-        console.error('Form modal element is null or undefined');
-        return;
-    }
-
-    enableValidation(editProfileForm);
-
     editProfileNameInput.value = profileTitle.textContent;
     editProfileJobInput.value = profileDescription.textContent;
+    clearValidation(editProfileForm, validationConfig);
 }
 
 const openFormAddCard = () => {
-    if (!formNewPlaceAdd) {
-        console.error('Form modal element is null or undefined');
-        return;
-    }
-
-    enableValidation(formNewPlaceAdd);
-
     formNewPlaceAdd.reset();
+    clearValidation(formNewPlaceAdd, validationConfig);
 }
 
-// Handle modal form edit profile (text fields)
+// OPEN Modal for edit avatar
+const openAvatarPopup = () => {
+    openModal(popupAvatar);
+    popupAvatarForm.reset();
+    clearValidation(popupAvatarForm, validationConfig);
+}
+
+// Handle modal form edit profile
 const handleFormEditProfile = (evt) => {
     evt.preventDefault(); 
     const nameValue = editProfileNameInput.value;
     const jobValue = editProfileJobInput.value;
-
-    profileTitle.textContent = nameValue;
-    profileDescription.textContent = jobValue;
-    closeModal(editPopup); 
+    changeUserInfo({ name: nameValue, about: jobValue })
+        .then((user) => {
+            profileTitle.textContent = user.name;
+            profileDescription.textContent = user.about;
+            closeModal(editPopup);
+        })
+        .catch((err) => {
+            console.error('Ошибка обновления профиля:', err);
+        });
 }
 
 const handleFormAddCard = (evt) => {
     evt.preventDefault(); 
-    const cardData = {
+    const newCard = {
         name: popupInputCardTitle.value,
-        link: popupInputCardLink.value
+        link: popupInputCardLink.value,
+        likes: []
     };
 
-    const cardElement = createCard(cardData, deleteCard, cardLike, openCardPopup);
-    cardList.prepend(cardElement);
-    formNewPlaceAdd.reset(); 
-    closeModal(popupNewCard); 
+    addCard(newCard)
+    .then((cardFromServer) => {
+        cardList.prepend(createCard(
+             cardFromServer,
+             deleteCard, 
+             cardLike, 
+             openCardPopup, 
+             cardFromServer.owner._id
+            ));
+        formNewPlaceAdd.reset(); 
+        closeModal(popupNewCard)})
+    .catch(err => console.error(`Ошибка: ${err}`))
 }
 
-// @todo: Функция открытия модального окна с изображением карточки
+
+
+// @todo: Create function to open card popup
 const openCardPopup = (card) => {
     popupCardTitle.textContent = card.name;
     popupCardImage.src = card.link;
@@ -167,60 +166,26 @@ formNewPlaceAdd.addEventListener('submit', handleFormAddCard);
 editProfileForm.addEventListener('submit', handleFormEditProfile);
 
 
-
-
-
-// AVATAR EDIT
-const popupAvatar = document.querySelector('.profile__image');
-const popupAvatarForm = document.forms["popup_type_image"];
-const editAvatarButton = document.querySelector('.profile__edit-avatar-button');
-const popupInputAvatarLink = popupAvatarForm.querySelector('.popup__input_type_avatar-link');
-const saveAvatarButton = popupAvatarForm.querySelector('.popup__button');
-
-// Функция открытия модального окна редактирования аватара
-const openAvatarPopup = () => {
-    openModal(popupAvatarForm);
-    enableValidation(popupAvatarForm);
-    popupAvatarForm.reset();
-
-    if (!popupAvatarForm) {
-        console.error('Form modal element is null or undefined');
-        return;
-    }
-}
-
 // Edit avatar
-editAvatarButton.addEventListener('click', openAvatarPopup);
+profileImage.addEventListener('click', openAvatarPopup)
 
 popupAvatarForm.addEventListener('submit', (evt) => {
     evt.preventDefault(); 
-    const avatarLink = popupAvatarForm.querySelector('.popup__input_type_avatar-link').value;
+    const avatarLink = popupInputAvatarLink.value;
+
     changeAvatar({avatar: avatarLink})
-        .then(() => {
-            // Обновите аватар на странице, если нужно
-            popupAvatar.src = avatarLink;
-            popupAvatar.alt = `На изображении ${profileTitle.textContent}`;
-            closeModal(popupAvatarForm);
+        .then((userData) => {
+            profileImage.style.backgroundImage =` url(${userData.avatar})`;
+            closeModal(popupAvatar);
         })
         .catch((err) => {
-            console.error('Ошибка при изменении аватара:',err);
+            console.error('Ошибка при изменении аватара:', err);
+        })
+        .finally(() => {
+            saveAvatarButton.textContent = 'Сохранить';
         });
-
-});
-
-saveAvatarButton.addEventListener('click', () => {
-    popupInputAvatarLink.value = popupAvatarForm.querySelector('.popup__input_type_avatar-link').value;
-    changeAvatar(); 
-    closeModal(popupAvatarForm);
 });
 
 
-// // ToDo счетчик лайков
-// const likeCounter = document.querySelectorAll('.card__like-counter');
-// // все лайки лежат в одном массиве likes. При нажатии на лайк, 
-// // в массиве изменяется количество лайков, при нажатии на дизлайк, 
-// // в массиве уменьшается количество лайков. Длина массива - количество лайков.
-// const likes = document.querySelectorAll('.card__like-button');
-// likes.forEach((like, index) => {
-//     likeCounter[index].textContent = likes.length;
-// });
+enableValidation(validationConfig);
+
