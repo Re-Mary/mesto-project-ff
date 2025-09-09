@@ -1,7 +1,7 @@
 import "./pages/index.css";
 import { createCard, deleteCard, cardLike } from "./components/card.js";
 import { openModal, closeModal } from "./components/modal.js";
-import { enableValidation, clearValidation } from "./components/validation.js";
+import { enableValidation, clearValidation} from "./components/validation.js";
 import { getUserInfo, getCards, changeUserInfo, changeAvatar, addCard } from "./components/api.js";
 
 
@@ -17,6 +17,7 @@ const popupNewCard = document.querySelector('.popup_type_new-card');
 const formNewPlaceAdd = document.forms["new-place"];
 const popupInputCardTitle = formNewPlaceAdd.querySelector('.popup__input_type_card-name');
 const popupInputCardLink = formNewPlaceAdd.querySelector('.popup__input_type_url');
+const addCardButton = formNewPlaceAdd.querySelector('.popup__button');
 
 // Card Images
 const popupImage = document.querySelector('.popup_type_image');
@@ -32,6 +33,7 @@ const editProfileJobInput = editProfileForm.querySelector('.popup__input_type_de
 const profileTitle = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
 const profileImage = document.querySelector('.profile__image');
+const editProfileSaveButton = editProfileForm.querySelector('.popup__button');
 
 // AVATAR EDIT
 const popupAvatar = document.querySelector('.popup_type_avatar');
@@ -40,7 +42,7 @@ const popupInputAvatarLink = popupAvatarForm.querySelector('.popup__input_type_u
 const saveAvatarButton = popupAvatarForm.querySelector('.popup__button');
 
 // CONFIG
-const validationConfig= {
+export const validationConfig= {
     formSelector: '.popup__form',
     inputSelector: '.popup__input',
     submitButtonSelector: '.popup__button',
@@ -82,19 +84,19 @@ const updatedUser = (user) => {
 const openFormEditProfile = () => {
     editProfileNameInput.value = profileTitle.textContent;
     editProfileJobInput.value = profileDescription.textContent;
-    clearValidation(editProfileForm, validationConfig);
+    clearValidation(editProfileForm, editProfileSaveButton, validationConfig);
 }
 
 const openFormAddCard = () => {
     formNewPlaceAdd.reset();
-    clearValidation(formNewPlaceAdd, validationConfig);
+    clearValidation(formNewPlaceAdd, addCardButton, validationConfig);
 }
 
 // OPEN Modal for edit avatar
 const openAvatarPopup = () => {
     openModal(popupAvatar);
     popupAvatarForm.reset();
-    clearValidation(popupAvatarForm, validationConfig);
+    clearValidation(popupAvatarForm, saveAvatarButton, validationConfig);
 }
 
 // Handle modal form edit profile

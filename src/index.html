@@ -41,39 +41,61 @@
         <button type="button" class="popup__close"></button>
         <h3 class="popup__title">Редактировать профиль</h3>
         <form class="popup__form" name="edit-profile" novalidate>
-          <input id="edit-profil__name" type="text" name="username" class="popup__input popup__input_type_name"
-            placeholder="Имя" required pattern="[а-яёА-ЯЁa-zA-Z\s\-]{2,40}"
-            data-error-message="Длина имени должна быть больше 2 символов и меньше 40. Допустимы только латинские, кириллические буквы, знаки дефиса и пробелы"
-            aria-errormessage="edit-profil__name-error">
+          <input id="edit-profil__name" 
+                 type="text" 
+                 name="username" 
+                 class="popup__input popup__input_type_name"
+                 placeholder="Имя" required 
+                 minlength="2" 
+                 maxlength="40" 
+                 pattern="^^[a-zA-Zа-яА-Я\sёЁ\-]+$"
+                 data-error-message="Длина имени должна быть больше 2 символов и меньше 40. Допустимы только латинские, кириллические буквы, знаки дефиса и пробелы"
+                 aria-errormessage="edit-profil__name-error">
           <span class="popup__input-error"></span>
-          <input id="description" type="text" name="description" class="popup__input popup__input_type_description"
-            placeholder="Занятие" required pattern="[а-яёА-ЯЁa-zA-Z\s\-]{2,200}"
-            data-error-message="Длина описания должна быть больше 2 символов и меньше 200. Допустимы только латинские, кириллические буквы, знаки дефиса и пробелы"
-            aria-errormessage="description-error">
+          <input id="description" 
+                 type="text" 
+                 name="description" 
+                 class="popup__input popup__input_type_description"
+                 placeholder="Занятие" required 
+                 minlength="2" 
+                 maxlength="200" 
+                 pattern="^^[a-zA-Zа-яА-Я\sёЁ\-]+$"
+                 data-error-message="Длина описания должна быть больше 2 символов и меньше 200. Допустимы только латинские, кириллические буквы, знаки дефиса и пробелы"
+                 aria-errormessage="description-error">
           <span class="popup__input-error description__input-error" id="description-error"></span>
           <button type="submit" class="button popup__button" data-content-normal="Сохранить"
             data-loading-text="Сохранение...">Сохранить</button>
         </form>
       </div>
     </div>
-    <div class="popup popup_type_new-card">
-      <div class="popup__content">
-        <button type="button" class="popup__close"></button>
-        <h3 class="popup__title">Новое место</h3>
-        <form class="popup__form" name="new-place" novalidate>
-          <input type="text" name="place-name" class="popup__input popup__input_type_card-name" placeholder="Название"
-            required pattern="[а-яёА-ЯЁa-zA-Z\s\-]{2,30}"
-            data-error-message="Длина описания должна быть больше 2 символов и меньше 30. Допустимы только латинские, кириллические буквы, знаки дефиса и пробелы"
-            aria-errormessage="place-name-error">
-          <span class="popup__input-error"></span>
-          <input type="url" name="link" class="popup__input popup__input_type_url" placeholder="Ссылка на картинку"
-            required aria-errormessage="link-error">
-          <span class="popup__input-error"></span>
-          <button type="submit" class="button popup__button">Сохранить</button>
-        </form>
-      </div>
-    </div>
-    <div class="popup popup_type_image">
+
+        <div class="popup popup_type_new-card" tabindex="-1">
+          <div class="popup__content">
+            <button type="button" class="popup__close"></button>
+            <h3 class="popup__title">Новое место</h3>
+            <form novalidate class="popup__form" name="new-place">
+              <input id="place-name" 
+                     type="text" 
+                     name="place-name" 
+                     class="popup__input popup__input_type_card-name"
+                     placeholder="Название" 
+                     minlength="2" 
+                     maxlength="30" 
+                     pattern="^[a-zA-Zа-яА-Я\sёЁ\-]+$"
+                     data-error-message="Длина описания должна быть больше 2 символов и меньше 30. Допустимы только латинские, кириллические буквы, знаки дефиса и пробелы" required>
+              <span class="place-name-error popup__input-error"></span>
+              <input id="link" 
+                     type="url" 
+                     name="link" 
+                     class="popup__input popup__input_type_url"
+                     placeholder="Ссылка на картинку" required>
+              <span class="link-error popup__input-error"></span>
+              <button type="submit" class="button popup__button">Сохранить</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="popup popup_type_image">
       <div class="popup__content popup__content_content_image">
         <button type="button" class="popup__close"></button>
         <img src="" alt="" class="popup__image">
@@ -86,9 +108,12 @@
         <button type="button" class="popup__close"></button>
         <h3 class="popup__title">Обновить аватар</h3>
         <form novalidate class="popup__form" name="new-avatar">
-          <input id="avatar" name="avatar" type="url" class="popup__input popup__input_type_url"
-            placeholder="Введите ссылку на новое изображение" required>
-          <span class="avatar-error"></span>
+          <input id="avatar" 
+                 name="avatar" 
+                 type="url" 
+                 class="popup__input popup__input_type_url"
+                 placeholder="Введите ссылку на новое изображение" required>
+          <span class="avatar-error popup__input-error"></span>
           <button type="submit" class="button popup__button">Сохранить</button>
         </form>
       </div>
